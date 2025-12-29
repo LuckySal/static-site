@@ -74,3 +74,31 @@ def text_node_to_html_node(text_node):
             )
         case _:
             raise TypeError("Node is not a recognized type.")
+
+
+def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    new_nodes = []
+    for node in old_nodes:
+        if not node.text_type == TextType.TEXT:
+            new_nodes.append(node)
+        else:
+            if node.text.count(delimiter) == 0:
+                new_nodes.append(node)
+            elif node.text.count(delimiter) == 2:
+                text_list = node.text.split(delimiter)
+                if text_list[0] != "":
+                    new_nodes.append(
+                        TextNode(text_list[0], TextType.TEXT, url=node.url)
+                    )
+                new_nodes.append(
+                    TextNode(text_list[1], text_type, url=node.url)
+                )
+                if text_list[2] != "":
+                    new_nodes.append(
+                        TextNode(text_list[2], TextType.TEXT, url=node.url)
+                    )
+            else:
+                raise ValueError(
+                    f'"{node.text}" does not contain valid markdown.'
+                )
+    return new_nodes

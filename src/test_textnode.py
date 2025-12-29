@@ -1,9 +1,15 @@
 import unittest
 
-from textnode import TextNode, TextType, text_node_to_html_node
+from textnode import (
+    TextNode,
+    TextType,
+    text_node_to_html_node,
+    split_nodes_delimiter,
+)
 
 
 class TestTextNode(unittest.TestCase):
+    # TextNode
     def test_text_empty(self):
         with self.assertRaises(TypeError):
             node = TextNode()
@@ -35,6 +41,7 @@ class TestTextNode(unittest.TestCase):
         with self.assertRaises(AttributeError):
             node = TextNode("Text node with invalid type", TextType.BOOK)
 
+    # text_node_to_html_node
     def test_text_text_to_html(self):
         node = TextNode("This is a text node", TextType.TEXT)
         html_node = text_node_to_html_node(node)
@@ -46,6 +53,66 @@ class TestTextNode(unittest.TestCase):
         html_node = text_node_to_html_node(node)
         expected = '<img src="image.png" alt="Image alt text"></img>'
         self.assertEqual(html_node.to_html(), expected)
+
+    # split_nodes_delimiter
+    def text_split_markdown(self):
+        node = TextNode("This contains *bold* text.", TextType.TEXT)
+        split_nodes = split_nodes_delimiter([node], "*", TextType.BOLD)
+        self.assertEqual(split_nodes[1].text, "bold")
+        self.assertEqual(split_nodes[1].text_type, TextType.BOLD)
+        self.assertEqual(split_nodes[0].text_type, TextType.TEXT)
+        self.assertEqual(len(split_nodes), 3)
+
+    def test_split_md_beginning(self):
+        node = TextNode("_The_ italic text is at the beginning", TextType.TEXT)
+        split_nodes = split_nodes_delimiter([node], "_", TextType.ITALIC)
+        self.assertEqual(split_nodes[0].text, "The")
+        self.assertEqual(split_nodes[0].text_type, TextType.ITALIC)
+        self.assertEqual(split_nodes[1].text_type, TextType.TEXT)
+        self.assertEqual(len(split_nodes), 2)
+
+    def test_split_md_end(self):
+        node = TextNode("The italic text is at the _end_", TextType.TEXT)
+        split_nodes = split_nodes_delimiter([node], "_", TextType.ITALIC)
+        self.assertEqual(split_nodes[1].text, "end")
+        self.assertEqual(split_nodes[1].text_type, TextType.ITALIC)
+        self.assertEqual(split_nodes[0].text_type, TextType.TEXT)
+        self.assertEqual(len(split_nodes), 2)
+
+    def test_split_no_md(self):
+        node = TextNode("This text contains no markdown.", TextType.TEXT)
+        split_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+        self.assertEqual(split_nodes[0].text, "This text contains no markdown.")
+        self.assertEqual(len(split_nodes), 1)
+
+    def test_split_other_text_type(self):
+        node = TextNode("This whole node is bold.", TextType.BOLD)
+        split_nodes_bold = split_nodes_delimiter([node], "*", TextType.BOLD)
+        split_nodes_italic = split_nodes_delimiter([node], "_", TextType.ITALIC)
+        self.assertEqual(len(split_nodes_bold), 1)
+        self.assertEqual(split_nodes_bold[0].text, "This whole node is bold.")
+        self.assertEqual(split_nodes_bold[0].text_type, TextType.BOLD)
+        self.assertEqual(len(split_nodes_italic), 1)
+        self.assertEqual(split_nodes_italic[0].text, "This whole node is bold.")
+        self.assertEqual(split_nodes_italic[0].text_type, TextType.BOLD)
+
+    def test_split_multiple_nodes(self):
+        node1 = TextNode("This node has *bold* text.", TextType.TEXT)
+        node2 = TextNode("This node has _italic_ text.", TextType.TEXT)
+        split_nodes_bold = split_nodes_delimiter(
+            [node1, node2], "*", TextType.BOLD
+        )
+        self.assertEqual(len(split_nodes_bold), 4)
+        self.assertEqual(split_nodes_bold[1].text_type, TextType.BOLD)
+        self.assertEqual(split_nodes_bold[3].text_type, TextType.TEXT)
+
+        split_nodes_both = split_nodes_delimiter(
+            split_nodes_bold, "_", TextType.ITALIC
+        )
+        self.assertEqual(len(split_nodes_both), 6)
+        self.assertEqual(split_nodes_both[4].text_type, TextType.ITALIC)
+        self.assertEqual(split_nodes_both[4].text, "italic")
+        self.assertEqual(split_nodes_both[3].text_type, TextType.TEXT)
 
 
 if __name__ == "__main__":
