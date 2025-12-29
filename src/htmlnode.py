@@ -46,8 +46,50 @@ class HTMLNode:
         )
 
 
+class ParentNode(HTMLNode):
+    """HTML node that has children
+
+    Attributes:
+        tag: A string HTML tag
+        children: A list of children
+        props: A dictionary of HTML properties
+    """
+
+    def __init__(self, tag, children, props={}):
+        """ParentNode constructor
+
+        Args:
+            tag (string, required): The HTML tag
+            children (list, required): A list of children.
+            props (dict, optional): A dictionary of HTML properties. Defaults to {}.
+        """
+        super().__init__(tag=tag, children=children, props=props)
+
+    def to_html(self):
+        """Returns an HTML formatted string from node properties
+           Includes child nodes.
+
+        Raises:
+            ValueError: Parent node must have a tag.
+            ValueError: Parent node must have at least one child node.
+
+        Returns:
+            string: An HTML formatted string of current node and all children.
+        """
+        if not self.tag:
+            raise ValueError("parent nodes must have a tag")
+        if not self.children:
+            raise ValueError("parent node must have at least one child")
+        props = self.props_to_html()
+        res = f"<{self.tag}{props}>"
+        for child in self.children:
+            res += child.to_html()
+        res += f"</{self.tag}>"
+        return res
+
+
 class LeafNode(HTMLNode):
-    """An HTML node with no children
+    """An HTML node that has no children.
 
     Attributes:
         tag: A string HTML tag
@@ -59,8 +101,8 @@ class LeafNode(HTMLNode):
         """LeafNode constructor
 
         Args:
-            tag (string): The HTML tag
-            value (string): The text value
+            tag (string, required): The HTML tag
+            value (string, required): The text value
             props (dict, optional): A dictionary of properties. Defaults to {}.
         """
         super().__init__(tag=tag, value=value, props=props)
