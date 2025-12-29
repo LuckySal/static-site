@@ -116,7 +116,7 @@ class LeafNode(HTMLNode):
         Returns:
             string: HTML formatted string
         """
-        if not self.value:
+        if self.value is None:
             raise ValueError("leaf nodes must have a value")
         if not self.tag:
             return self.value
