@@ -17,16 +17,19 @@ def markdown_to_blocks(text):
 
 
 def block_to_block_type(block):
-    if re.search(r"^(#{1-6} ).+", block):
+    if re.search(r"^(#{1,6} ).+", block):
         return BlockType.HEADING
-    if re.search(r"^```[\s.]+```$", block):
+    if re.search(r"^```[\s\S]+```$", block):
         return BlockType.CODE
     if block[0] == ">":
-        return is_quote(block)
+        if is_quote(block):
+            return BlockType.QUOTE
     if block[0:2] == "- ":
-        return is_ul(block)
+        if is_ul(block):
+            return BlockType.UNORDERED_LIST
     if block[0:3] == "1. ":
-        return is_ol(block)
+        if is_ol(block):
+            return BlockType.ORDERED_LIST
     return BlockType.PARAGRAPH
 
 

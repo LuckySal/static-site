@@ -38,19 +38,33 @@ It should be of type \"paragraph\""""
 
     # TODO: Finish unit tests
     def test_block_type_heading(self):
-        pass
+        heading_block = """# This is a "Heading" block"""
+        self.assertEqual(BlockType.HEADING, block_to_block_type(heading_block))
 
     def test_block_type_code(self):
-        pass
+        code_block = """```This is a "code" block```"""
+        self.assertEqual(BlockType.CODE, block_to_block_type(code_block))
 
     def test_block_type_quote(self):
-        pass
+        quote_block = """>Quote line 1
+>Quote line 2
+>Quote line 3"""
+        self.assertEqual(BlockType.QUOTE, block_to_block_type(quote_block))
 
     def test_block_type_ul(self):
-        pass
+        ul_block = """- Item
+- Item
+- Item"""
+        self.assertEqual(
+            BlockType.UNORDERED_LIST, block_to_block_type(ul_block)
+        )
 
     def test_block_type_ol(self):
-        pass
+        ol_block = """1. Item 1
+2. Item 2
+3. Item 3
+4. Item 4"""
+        self.assertEqual(BlockType.ORDERED_LIST, block_to_block_type(ol_block))
 
 
 if __name__ == "__main__":
