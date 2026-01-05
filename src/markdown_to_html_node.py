@@ -1,4 +1,4 @@
-from htmlnode import ParentNode, LeafNode
+from htmlnode import ParentNode
 from textnode import (
     TextType,
     TextNode,
