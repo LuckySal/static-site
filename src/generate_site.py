@@ -4,7 +4,7 @@ import shutil
 from markdown_to_html_node import markdown_to_html_node, extract_heading
 
 
-def generate_pages(from_dir, dest_dir, template_path):
+def generate_pages(basepath, from_dir, dest_dir, template_path):
     # Read template file
     with open(template_path) as template_file:
         template = template_file.read()
@@ -31,7 +31,12 @@ def generate_pages(from_dir, dest_dir, template_path):
             heading = extract_heading(md)
             node = markdown_to_html_node(md)
             html_with_heading = template.replace("{{ Title }}", heading)
-            html = html_with_heading.replace("{{ Content }}", node.to_html())
+            html_with_contents = html_with_heading.replace(
+                "{{ Content }}", node.to_html()
+            )
+            html = html_with_contents.replace(
+                'href="/', f'href="{basepath}'
+            ).replace('src="/', f'src="{basepath}')
 
             # Write new static site to destination
             with open(destination, "w") as dest_file:
@@ -44,11 +49,13 @@ def copy_static(source_path, dest_path):
     traverse_directory(source_path, contents_list)
 
     # Clear destination directory
+    print("Deleting docs directory...")
     if os.path.exists(dest_path):
         shutil.rmtree(dest_path)
     os.mkdir(dest_path)
 
     # Copy contents of source directory into destination
+    print("Copying static files to docs directory...")
     for item in contents_list:
         dest = item.replace(source_path, dest_path, 1)
         create_directory(dest)
